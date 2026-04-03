@@ -1,71 +1,61 @@
-import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 
 export default function HomeScreen({ navigation }) {
     return (
-        <SafeAreaView style={styles.safeArea} className="flex-1 bg-[#0a0a0a] items-center justify-between py-16">
-            <View style={styles.container} className="items-center justify-between flex-1 w-full">
-                {/* Title Section */}
-                <View className="items-center gap-3 mt-10">
-                    <Text className="text-8xl">🤚</Text>
-                    <Text className="text-4xl font-black text-white tracking-wide">
-                        After Round 1
+        <SafeAreaView className="flex-1 bg-[#fdfafa]">
+            <StatusBar barStyle="light-content" />
+
+            <View className="flex-1 px-8 items-center justify-between py-12">
+
+                {/* Header / Brand */}
+                <View className="items-center mt-12">
+                    <View className="mb-6">
+                        <Text className="text-8xl">🤚🏾</Text>
+                    </View>
+                    <Text className="text-[#0a0a0a] text-5xl font-black tracking-tighter" >
+                        AFTER<Text className="text-[#00ff87]">ROUND</Text>1
                     </Text>
-                    <Text className="text-sm text-gray-500 tracking-widest uppercase">
-                        The Nigerian Classic
-                    </Text>
+                    <View className="mt-2 px-3 py-1 rounded-full border border-gray-200">
+                        <Text className="text-gray-400 text-xs font-bold tracking-[4px] uppercase">
+                            The Nigerian Classic
+                        </Text>
+                    </View>
                 </View>
 
-                {/* Buttons */}
-                <View className="w-full px-8 gap-4">
+                {/* Action Section */}
+                <View className="w-full space-y-4 mb-10">
                     <TouchableOpacity
-                        className="bg-[#00ff87] py-5 rounded-2xl items-center"
-                        style={styles.button}
+                        activeOpacity={0.8}
+                        className="bg-[#00ff87] h-18 rounded-2xl items-center justify-center shadow-lg shadow-[#00ff87]/20"
+
                         onPress={() => navigation.navigate('Lobby')}
                     >
-                        <Text className="text-lg font-black text-[#0a0a0a]">
-                            Create Room
+                        <Text className="text-[#0a0a0a] text-xl font-black uppercase tracking-tight">
+                            Create Game
                         </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="bg-transparent py-5 rounded-2xl items-center border-2 border-[#00ff87]"
-                        style={styles.outlineButton}
+                        activeOpacity={0.7}
+                        className="bg-transparent h-18 rounded-2xl items-center justify-center border-2 border-[#00ff87]/30"
+
                         onPress={() => navigation.navigate('Lobby')}
                     >
-                        <Text className="text-lg font-black text-[#00ff87]">
-                            Join Room
+                        <Text className="text-[#00ff87] text-lg font-bold">
+                            Join with Code
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* Footer */}
-                <Text className="text-sm text-gray-700">
-                    Gather your people 🇳🇬
-                </Text>
+                <View className="items-center pb-4">
+                    <Text className="text-gray-400 text-xs font-medium">
+                        HANDS READY? 🇳🇬
+                    </Text>
+                    <View className="mt-2 h-1 w-1 rounded-full bg-[#00ff87]" />
+                </View>
+
             </View>
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#0a0a0a',
-    },
-    container: {
-        paddingVertical: 64,
-    },
-    button: {
-        backgroundColor: '#00ff87',
-        paddingVertical: 20,
-        borderRadius: 16,
-        alignItems: 'center',
-    },
-    outlineButton: {
-        paddingVertical: 20,
-        borderRadius: 16,
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#00ff87',
-    }
-});
