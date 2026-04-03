@@ -1,36 +1,78 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Animated, Easing } from 'react-native';
 import Hand from '../components/Hand';
+import { useGameLogic } from '../hooks/useGameLogic';
 
 const SlapScreen = ({ navigation }) => {
+    const { slapData, performSlap, gameState } = useGameLogic();
+    const rotateAnim = useRef(new Animated.Value(0)).current;
+
+    const isSlapper = slapData.slapper?.id === '1';
+
+    useEffect(() => {
+        if (gameState === 'RESULT') {
+            Animated.timing(rotateAnim, {
+                toValue: 1,
+                duration: 600,
+                easing: Easing.bezier(0.4, 0, 0.2, 1),
+                useNativeDriver: true,
+            }).start(() => {
+                navigation.navigate('Result', { flipped: true });
+            });
+        }
+    }, [gameState]);
+
+    const rotation = rotateAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '180deg'],
+    });
+
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-                {/* Split Screen for "Flip" Feeling */}
+            <Animated.View style={[styles.container, { transform: [{ rotate: rotation }] }]}>
+                {/* Lateral Header */}
                 <View style={styles.targetPane}>
-                    <Text style={styles.targetLabel}>THEY PICKED 4</Text>
+                    <Text style={styles.targetLabel}>
+                        {slapData.slappee?.name || "???"} PICKED {slapData.slappee?.pickedNumber || "?"}
+                    </Text>
                     <View style={styles.targetAvatar}>
-                        <Text style={styles.avatarEmoji}>😨</Text>
+                        <Text style={styles.avatarEmoji}>{isSlapper ? '😨' : '😈'}</Text>
                     </View>
+                    <Text style={styles.actionPrompt}>
+                        {isSlapper ? "SLAP THEM!" : "YOU ARE THE TARGET!"}
+                    </Text>
                 </View>
 
+                {/* Action Section */}
                 <View style={styles.actionPane}>
-                    <Text style={styles.actionLabel}>YOUR TURN TO SLAP!</Text>
-                    <TouchableOpacity
-                        style={styles.slapButton}
-                        activeOpacity={0.7}
-                        onPress={() => navigation.navigate('Result')}
-                    >
-                        <Text style={styles.slapButtonText}>FLIP & SLAP!</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.instruction}>Swing your phone! (Tap to test)</Text>
+                    <Text style={styles.actionLabel}>
+                        {isSlapper ? "VINDICATION!" : `${slapData.slapper?.name} is coming...`}
+                    </Text>
+
+                    {isSlapper ? (
+                        <TouchableOpacity
+                            style={styles.slapButton}
+                            activeOpacity={0.7}
+                            onPress={performSlap}
+                        >
+                            <Text style={styles.slapButtonText}>SLAP!</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={styles.waitingRing}>
+                            <Text style={styles.waitingText}>???</Text>
+                        </View>
+                    )}
+
+                    <Text style={styles.instruction}>
+                        {isSlapper ? "Tap Fast!" : "Hope they miss!"}
+                    </Text>
                 </View>
 
-                {/* Hand Animation Overlay */}
+                {/* Hand Overlay */}
                 <View style={styles.handContainer}>
-                    <Hand />
+                    <Hand type={isSlapper ? 'slap' : 'target'} />
                 </View>
-            </View>
+            </Animated.View>
         </SafeAreaView>
     );
 };
@@ -58,56 +100,77 @@ const styles = StyleSheet.create({
     },
     targetLabel: {
         color: '#666',
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: 'bold',
         marginBottom: 16,
     },
+    actionPrompt: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginTop: 16,
+    },
     targetAvatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         backgroundColor: '#222',
         alignItems: 'center',
         justifyContent: 'center',
     },
     avatarEmoji: {
-        fontSize: 50,
+        fontSize: 40,
     },
     actionLabel: {
         color: '#00ff87',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '900',
-        marginBottom: 24,
+        marginBottom: 20,
     },
     slapButton: {
-        width: 140,
-        height: 140,
+        width: 120,
+        height: 120,
         backgroundColor: '#00ff87',
-        borderRadius: 70,
+        borderRadius: 60,
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#00ff87',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.6,
-        shadowRadius: 20,
+        shadowOpacity: 0.8,
+        shadowRadius: 15,
+    },
+    waitingRing: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        borderWidth: 2,
+        borderColor: '#333',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    waitingText: {
+        color: '#333',
+        fontSize: 24,
+        fontWeight: '900',
     },
     slapButtonText: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '900',
         color: '#0a0a0a',
-        textAlign: 'center',
     },
     instruction: {
         color: '#444',
-        fontSize: 10,
-        marginTop: 16,
+        fontSize: 9,
+        marginTop: 12,
+        fontWeight: 'bold',
     },
     handContainer: {
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: [{ translateX: -60 }, { translateY: -60 }],
-        opacity: 0.8,
+        opacity: 0.6,
+        pointerEvents: 'none',
     }
 });
 

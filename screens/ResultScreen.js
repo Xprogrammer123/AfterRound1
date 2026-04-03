@@ -1,44 +1,58 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { useGameLogic } from '../hooks/useGameLogic';
 
-const ResultScreen = ({ navigation }) => {
-    // Mock results
-    const results = [
-        { name: 'You', number: 4, status: 'Winner' },
-        { name: 'Fawas', number: 4, status: 'Slapped!' },
-        { name: 'Ayo', number: 2, status: 'Safe' },
-    ];
+const ResultScreen = ({ navigation, route }) => {
+    const { flipped } = route.params || {};
+    const { players, resetGame, slapData } = useGameLogic();
+
+    const totalSum = players.reduce((sum, p) => sum + (p.pickedNumber || 0), 0);
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-                <Text style={styles.title}>ROUND RESULTS</Text>
+            <View style={[styles.container, flipped && styles.flippedContainer]}>
 
-                <View style={styles.summaryBox}>
-                    <Text style={styles.summaryTitle}>TOTAL SCORE</Text>
-                    <Text style={styles.totalNumber}>10</Text>
-                </View>
+                {/* Summary Section */}
+                <View style={styles.leftPane}>
+                    <Text style={styles.title}>RESULTS</Text>
+                    <View style={styles.summaryBox}>
+                        <Text style={styles.summaryTitle}>TOTAL SUM</Text>
+                        <Text style={styles.totalNumber}>{totalSum}</Text>
+                    </View>
 
-                <ScrollView style={styles.list}>
-                    {results.map((res, i) => (
-                        <View key={i} style={styles.row}>
-                            <View>
-                                <Text style={styles.playerName}>{res.name}</Text>
-                                <Text style={styles.status}>{res.status}</Text>
-                            </View>
-                            <Text style={styles.pickedNumber}>{res.number}</Text>
-                        </View>
-                    ))}
-                </ScrollView>
+                    <Text style={styles.verdict}>
+                        {slapData.slapper?.name} slapped {slapData.slappee?.name}!
+                    </Text>
 
-                <View style={styles.footer}>
                     <TouchableOpacity
                         style={styles.nextButton}
-                        onPress={() => navigation.navigate('Home')}
+                        onPress={() => {
+                            resetGame();
+                            navigation.navigate('Home');
+                        }}
                     >
-                        <Text style={styles.nextButtonText}>BACK TO HOME</Text>
+                        <Text style={styles.nextButtonText}>PLAY AGAIN</Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Breakdown Section */}
+                <View style={styles.rightPane}>
+                    <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
+                        {players.map((res, i) => (
+                            <View key={i} style={styles.row}>
+                                <View>
+                                    <Text style={styles.playerName}>{res.name}</Text>
+                                    <Text style={styles.status}>
+                                        {slapData.slapper?.id === res.id ? "Slapper 🖐️" :
+                                            slapData.slappee?.id === res.id ? "Slapped 🤕" : "Safe 😌"}
+                                    </Text>
+                                </View>
+                                <Text style={styles.pickedNumber}>{res.pickedNumber}</Text>
+                            </View>
+                        ))}
+                    </ScrollView>
+                </View>
+
             </View>
         </SafeAreaView>
     );
@@ -51,34 +65,54 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        padding: 24,
+        flexDirection: 'row',
+    },
+    flippedContainer: {
+        transform: [{ rotate: '180deg' }],
+    },
+    leftPane: {
+        flex: 0.4,
+        padding: 32,
+        justifyContent: 'center',
         alignItems: 'center',
+        borderRightWidth: 1,
+        borderRightColor: '#eee',
+    },
+    rightPane: {
+        flex: 0.6,
+        padding: 32,
     },
     title: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: '900',
         color: '#0a0a0a',
-        marginTop: 48,
-        marginBottom: 32,
+        marginBottom: 24,
     },
     summaryBox: {
         width: '100%',
         backgroundColor: '#0a0a0a',
-        padding: 32,
-        borderRadius: 24,
+        padding: 20,
+        borderRadius: 20,
         alignItems: 'center',
-        marginBottom: 32,
+        marginBottom: 16,
     },
     summaryTitle: {
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: 'bold',
         color: '#00ff87',
         letterSpacing: 2,
     },
     totalNumber: {
-        fontSize: 80,
+        fontSize: 48,
         fontWeight: '900',
         color: '#fff',
+    },
+    verdict: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 24,
+        fontWeight: '900',
     },
     list: {
         width: '100%',
@@ -87,39 +121,35 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 16,
+        paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
     playerName: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
         color: '#0a0a0a',
     },
     status: {
-        fontSize: 12,
+        fontSize: 10,
         color: '#666',
     },
     pickedNumber: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: '900',
         color: '#0a0a0a',
     },
-    footer: {
-        width: '100%',
-        marginTop: 'auto',
-        paddingVertical: 16,
-    },
     nextButton: {
-        backgroundColor: '#0a0a0a',
-        height: 64,
-        borderRadius: 20,
+        backgroundColor: '#00ff87',
+        width: '100%',
+        height: 54,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
     },
     nextButtonText: {
-        color: '#00ff87',
-        fontSize: 18,
+        color: '#0a0a0a',
+        fontSize: 16,
         fontWeight: '900',
     }
 });

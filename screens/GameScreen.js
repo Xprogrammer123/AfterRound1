@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import NumberPad from '../components/NumberPad';
+import { useGameLogic } from '../hooks/useGameLogic';
 
 const GameScreen = ({ navigation }) => {
-    const [selectedNumber, setSelectedNumber] = useState(null);
+    const { players, timer, round, pickNumber, gameState } = useGameLogic();
+    const currentPlayer = players.find(p => p.id === '1');
+
+    useEffect(() => {
+        if (gameState === 'SLAPPING') {
+            navigation.navigate('Slap');
+        }
+    }, [gameState]);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -13,32 +21,32 @@ const GameScreen = ({ navigation }) => {
                     <View style={styles.header}>
                         <View>
                             <Text style={styles.roundLabel}>ROUND</Text>
-                            <Text style={styles.roundNumber}>01</Text>
+                            <Text style={styles.roundNumber}>{round < 10 ? `0${round}` : round}</Text>
                         </View>
                         <View style={styles.timer}>
-                            <Text style={styles.timerText}>10s</Text>
+                            <Text style={styles.timerText}>{timer}s</Text>
                         </View>
                     </View>
 
                     <View style={styles.selectionZone}>
                         <Text style={styles.prompt}>YOUR PICK</Text>
                         <View style={styles.selectionDisplay}>
-                            <Text style={styles.selectionText}>{selectedNumber !== null ? selectedNumber : '?'}</Text>
+                            <Text style={styles.selectionText}>
+                                {currentPlayer?.pickedNumber !== null ? currentPlayer.pickedNumber : '?'}
+                            </Text>
                         </View>
                     </View>
 
-                    <TouchableOpacity
-                        style={[styles.confirmButton, selectedNumber === null && styles.disabledButton]}
-                        disabled={selectedNumber === null}
-                        onPress={() => navigation.navigate('Slap')}
-                    >
-                        <Text style={styles.confirmButtonText}>SUBMIT</Text>
-                    </TouchableOpacity>
+                    <View className="items-center">
+                        <Text style={styles.instruction}>
+                            {players.filter(p => p.id !== '1' && p.pickedNumber !== null).length} / {players.length - 1} Others Ready
+                        </Text>
+                    </View>
                 </View>
 
                 {/* Right Side: Number Pad */}
                 <View style={styles.rightPane}>
-                    <NumberPad onNumberPress={setSelectedNumber} />
+                    <NumberPad onNumberPress={pickNumber} />
                 </View>
             </View>
         </SafeAreaView>
@@ -117,21 +125,10 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         color: '#00ff87',
     },
-    confirmButton: {
-        backgroundColor: '#0a0a0a',
-        width: '100%',
-        height: 54,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    disabledButton: {
-        opacity: 0.3,
-    },
-    confirmButtonText: {
-        color: '#00ff87',
-        fontSize: 16,
-        fontWeight: '900',
+    instruction: {
+        fontSize: 12,
+        color: '#666',
+        fontWeight: 'bold',
     },
 });
 

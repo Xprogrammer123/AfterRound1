@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
 import PlayerCard from '../components/PlayerCard';
+import { useGameLogic } from '../hooks/useGameLogic';
 
 const LobbyScreen = ({ navigation }) => {
-    const players = [
-        { id: 1, name: 'You', isReady: true, isCurrentUser: true },
-        { id: 2, name: 'Fawas', isReady: true },
-        { id: 3, name: 'Ayo', isReady: false },
-        { id: 4, name: null },
-    ];
+    const { players, readyUp, gameState } = useGameLogic();
+
+    // Navigate when game starts
+    useEffect(() => {
+        if (gameState === 'PICKING') {
+            navigation.navigate('Game');
+        }
+    }, [gameState]);
 
     return (
         <SafeAreaView style={styles.safeArea}>
