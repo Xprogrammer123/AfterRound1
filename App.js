@@ -1,7 +1,10 @@
-import "./global.css";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
+import LobbyScreen from './screens/LobbyScreen';
+import GameScreen from './screens/GameScreen';
+import SlapScreen from './screens/SlapScreen';
+import ResultScreen from './screens/ResultScreen';
 
 const Stack = createNativeStackNavigator();
 
