@@ -1,157 +1,207 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
-import { useGameLogic } from '../hooks/useGameLogic';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 
-const ResultScreen = ({ navigation, route }) => {
-    const { flipped } = route.params || {};
-    const { players, resetGame, slapData } = useGameLogic();
+export default function ResultScreen({ navigation, route }) {
+  const { players, loser } = route.params || { players: [], loser: '' };
 
-    const totalSum = players.reduce((sum, p) => sum + (p.pickedNumber || 0), 0);
+  return (
+    <SafeAreaView style={styles.container}>
 
-    return (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={[styles.container, flipped && styles.flippedContainer]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.trophy}>🏆</Text>
+        <Text style={styles.title}>Round Over!</Text>
+        <Text style={styles.subtitle}>The slapping has been delivered</Text>
+      </View>
 
-                {/* Summary Section */}
-                <View style={styles.leftPane}>
-                    <Text style={styles.title}>RESULTS</Text>
-                    <View style={styles.summaryBox}>
-                        <Text style={styles.summaryTitle}>TOTAL SUM</Text>
-                        <Text style={styles.totalNumber}>{totalSum}</Text>
-                    </View>
-
-                    <Text style={styles.verdict}>
-                        {slapData.slapper?.name} slapped {slapData.slappee?.name}!
-                    </Text>
-
-                    <TouchableOpacity
-                        style={styles.nextButton}
-                        onPress={() => {
-                            resetGame();
-                            navigation.navigate('Home');
-                        }}
-                    >
-                        <Text style={styles.nextButtonText}>PLAY AGAIN</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Breakdown Section */}
-                <View style={styles.rightPane}>
-                    <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
-                        {players.map((res, i) => (
-                            <View key={i} style={styles.row}>
-                                <View>
-                                    <Text style={styles.playerName}>{res.name}</Text>
-                                    <Text style={styles.status}>
-                                        {slapData.slapper?.id === res.id ? "Slapper 🖐️" :
-                                            slapData.slappee?.id === res.id ? "Slapped 🤕" : "Safe 😌"}
-                                    </Text>
-                                </View>
-                                <Text style={styles.pickedNumber}>{res.pickedNumber}</Text>
-                            </View>
-                        ))}
-                    </ScrollView>
-                </View>
-
+      {/* Players List */}
+      <ScrollView style={styles.playersList} showsVerticalScrollIndicator={false}>
+        {players.map((player, index) => (
+          <View
+            key={index}
+            style={[
+              styles.playerCard,
+              player === loser && styles.playerCardLoser
+            ]}
+          >
+            <Text style={styles.playerEmoji}>
+              {player === loser ? '💀' : '😎'}
+            </Text>
+            <View style={styles.playerInfo}>
+              <Text style={[
+                styles.playerName,
+                player === loser && styles.playerNameLoser
+              ]}>
+                {player}
+              </Text>
+              <Text style={styles.playerStatus}>
+                {player === loser ? 'Got slapped 💥' : 'Survived this round'}
+              </Text>
             </View>
-        </SafeAreaView>
-    );
-};
+            {player === loser && (
+              <View style={styles.loserBadge}>
+                <Text style={styles.loserBadgeText}>SLAPPED</Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Stats */}
+      <View style={styles.statsRow}>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{players.length}</Text>
+          <Text style={styles.statLabel}>Players</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{players.length * 3}</Text>
+          <Text style={styles.statLabel}>Slaps Given</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>1</Text>
+          <Text style={styles.statLabel}>Victim</Text>
+        </View>
+      </View>
+
+      {/* Buttons */}
+      <TouchableOpacity
+        style={styles.playAgainButton}
+        onPress={() => navigation.navigate('Game', { players })}
+      >
+        <Text style={styles.playAgainButtonText}>Play Again 🔄</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.homeButton}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Text style={styles.homeButtonText}>Back to Home</Text>
+      </TouchableOpacity>
+
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#fdfafa',
-    },
-    container: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    flippedContainer: {
-        transform: [{ rotate: '180deg' }],
-    },
-    leftPane: {
-        flex: 0.4,
-        padding: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRightWidth: 1,
-        borderRightColor: '#eee',
-    },
-    rightPane: {
-        flex: 0.6,
-        padding: 32,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '900',
-        color: '#0a0a0a',
-        marginBottom: 24,
-    },
-    summaryBox: {
-        width: '100%',
-        backgroundColor: '#0a0a0a',
-        padding: 20,
-        borderRadius: 20,
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    summaryTitle: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        color: '#00ff87',
-        letterSpacing: 2,
-    },
-    totalNumber: {
-        fontSize: 48,
-        fontWeight: '900',
-        color: '#fff',
-    },
-    verdict: {
-        fontSize: 14,
-        color: '#666',
-        textAlign: 'center',
-        marginBottom: 24,
-        fontWeight: '900',
-    },
-    list: {
-        width: '100%',
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    playerName: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#0a0a0a',
-    },
-    status: {
-        fontSize: 10,
-        color: '#666',
-    },
-    pickedNumber: {
-        fontSize: 20,
-        fontWeight: '900',
-        color: '#0a0a0a',
-    },
-    nextButton: {
-        backgroundColor: '#00ff87',
-        width: '100%',
-        height: 54,
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    nextButtonText: {
-        color: '#0a0a0a',
-        fontSize: 16,
-        fontWeight: '900',
-    }
+  container: {
+    flex: 1,
+    backgroundColor: '#0a0a0a',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  trophy: {
+    fontSize: 70,
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#ffffff',
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#888',
+  },
+  playersList: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  playerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 10,
+  },
+  playerCardLoser: {
+    backgroundColor: 'rgba(255,50,50,0.1)',
+    borderWidth: 1,
+    borderColor: '#ff3232',
+  },
+  playerEmoji: {
+    fontSize: 30,
+    marginRight: 14,
+  },
+  playerInfo: {
+    flex: 1,
+  },
+  playerName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 2,
+  },
+  playerNameLoser: {
+    color: '#ff3232',
+  },
+  playerStatus: {
+    fontSize: 12,
+    color: '#666',
+  },
+  loserBadge: {
+    backgroundColor: 'rgba(255,50,50,0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  loserBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#ff3232',
+    letterSpacing: 1,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#00ff87',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: '#666',
+    letterSpacing: 1,
+  },
+  playAgainButton: {
+    backgroundColor: '#00ff87',
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  playAgainButtonText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0a0a0a',
+  },
+  homeButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#333',
+  },
+  homeButtonText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#666',
+  },
 });
-
-export default ResultScreen;
