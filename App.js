@@ -1,7 +1,7 @@
 import "./global.css";
 import { useEffect } from "react";
 import * as ScreenOrientation from "expo-screen-orientation";
-
+import "./global.css";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 

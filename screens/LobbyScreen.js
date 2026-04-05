@@ -1,129 +1,73 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
-import PlayerCard from '../components/PlayerCard';
-import { useGameLogic } from '../hooks/useGameLogic';
+import { View, Text, TouchableOpacity, TextInput, SafeAreaView, ScrollView } from 'react-native';
+import { useState } from 'react';
 
-const LobbyScreen = ({ navigation }) => {
-    const { players, readyUp, gameState } = useGameLogic();
+export default function LobbyScreen({ navigation }) {
+  const [roomCode] = useState('NG' + Math.floor(1000 + Math.random() * 9000));
+  const [playerName, setPlayerName] = useState('');
+  const [players, setPlayers] = useState(['You']);
 
-    // Navigate when game starts
-    useEffect(() => {
-        if (gameState === 'PICKING') {
-            navigation.navigate('Game');
-        }
-    }, [gameState]);
+  const addPlayer = () => {
+    if (playerName.trim()) {
+      setPlayers([...players, playerName.trim()]);
+      setPlayerName('');
+    }
+  };
 
-    return (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-                {/* Lateral Header */}
-                <View style={styles.sidebar}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Text style={styles.backButton}>←</Text>
-                    </TouchableOpacity>
-                    <View style={styles.roomInfo}>
-                        <Text style={styles.roomLabel}>ROOM CODE</Text>
-                        <Text style={styles.roomCode}>AFR-26</Text>
-                    </View>
-                    <TouchableOpacity
-                        style={styles.readyButton}
-                        onPress={() => navigation.navigate('Game')}
-                    >
-                        <Text style={styles.readyButtonText}>READY</Text>
-                    </TouchableOpacity>
-                </View>
+  return (
+    <SafeAreaView className="flex-1 bg-[#0a0a0a] px-6 py-10">
+      
+      {/* Header */}
+      <View className="items-center mb-8">
+        <Text className="text-gray-500 text-sm uppercase tracking-widest mb-1">Room Code</Text>
+        <Text className="text-4xl font-black text-[#00ff87] tracking-widest">{roomCode}</Text>
+        <Text className="text-gray-600 text-xs mt-1">Share this with your people</Text>
+      </View>
 
-                {/* Main Content (Horizontal Scroll) */}
-                <View style={styles.mainContent}>
-                    <View style={styles.titleSection}>
-                        <Text style={styles.title}>LOBBY</Text>
-                        <Text style={styles.subtitle}>Waiting for players...</Text>
-                    </View>
-
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.playerScroll}>
-                        {players.map((player, index) => (
-                            <PlayerCard
-                                key={index}
-                                name={player.name}
-                                isReady={player.isReady}
-                                isCurrentUser={player.isCurrentUser}
-                            />
-                        ))}
-                    </ScrollView>
-                </View>
+      {/* Players */}
+      <Text className="text-white font-bold text-lg mb-3">Players ({players.length})</Text>
+      <ScrollView className="mb-6">
+        {players.map((player, index) => (
+          <View key={index} className="flex-row items-center bg-[#1a1a1a] rounded-2xl px-4 py-4 mb-3">
+            <View className="w-10 h-10 rounded-full bg-[#00ff87] items-center justify-center mr-3">
+              <Text className="text-[#0a0a0a] font-black text-lg">
+                {player.charAt(0).toUpperCase()}
+              </Text>
             </View>
-        </SafeAreaView>
-    );
-};
+            <Text className="text-white font-semibold text-base">{player}</Text>
+            {index === 0 && (
+              <View className="ml-auto bg-[#00ff87]/20 px-3 py-1 rounded-full">
+                <Text className="text-[#00ff87] text-xs font-bold">HOST</Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </ScrollView>
 
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#fdfafa',
-    },
-    container: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    sidebar: {
-        width: 140,
-        backgroundColor: '#fff',
-        borderRightWidth: 1,
-        borderRightColor: '#eee',
-        padding: 20,
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    backButton: {
-        fontSize: 24,
-        color: '#0a0a0a',
-    },
-    roomInfo: {
-        alignItems: 'center',
-    },
-    roomLabel: {
-        fontSize: 8,
-        fontWeight: 'bold',
-        color: '#aaa',
-        letterSpacing: 1,
-    },
-    roomCode: {
-        fontSize: 20,
-        fontWeight: '900',
-        color: '#0a0a0a',
-    },
-    mainContent: {
-        flex: 1,
-        padding: 24,
-    },
-    titleSection: {
-        marginBottom: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '900',
-        color: '#0a0a0a',
-    },
-    subtitle: {
-        fontSize: 12,
-        color: '#666',
-    },
-    playerScroll: {
-        alignItems: 'center',
-        paddingVertical: 10,
-    },
-    readyButton: {
-        backgroundColor: '#00ff87',
-        width: '100%',
-        paddingVertical: 12,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    readyButtonText: {
-        fontSize: 12,
-        fontWeight: '900',
-        color: '#0a0a0a',
-    },
-});
+      {/* Add Player */}
+      <View className="flex-row gap-3 mb-6">
+        <TextInput
+          className="flex-1 bg-[#1a1a1a] text-white px-4 py-4 rounded-2xl"
+          placeholder="Add player name..."
+          placeholderTextColor="#444"
+          value={playerName}
+          onChangeText={setPlayerName}
+        />
+        <TouchableOpacity
+          className="bg-[#1a1a1a] px-5 rounded-2xl items-center justify-center"
+          onPress={addPlayer}
+        >
+          <Text className="text-[#00ff87] text-2xl font-black">+</Text>
+        </TouchableOpacity>
+      </View>
 
-export default LobbyScreen;
+      {/* Start Button */}
+      <TouchableOpacity
+        className="bg-[#00ff87] py-5 rounded-2xl items-center"
+        onPress={() => navigation.navigate('Game', { players })}
+      >
+        <Text className="text-[#0a0a0a] font-black text-lg">Start Game 🎮</Text>
+      </TouchableOpacity>
+
+    </SafeAreaView>
+  );
+}
